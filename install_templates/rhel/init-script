@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+# chkconfig: - 27 73
+# description: Starts and stops the GoSYNC application
+#         #
+# pidfile: /var/run/gosync.pid
+# config: /etc/gosync/config.cfg
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+# Avoid using roots TMPDIR
+unset TMPDIR
+# Source networking configuration.
+. /etc/sysconfig/network
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 1
+# Check that the config file exists.
+[ -f /etc/gosync/config.cfg ] || exit 6
+
+RETVAL=0
+GOSYNCEXEC="/usr/local/bin/gosync"
+GOSYNCOPTIONS='-config /etc/gosync/config.cfg'
+GSPID="/var/run/gosync.pid"
+start() {
+        KIND="GoSYNC"
+  echo -n $"Starting $KIND services: "
+  daemon --user=root --pidfile $GSPID "$GOSYNCEXEC $GOSYNCOPTIONS &"
+  RETVAL=$?
+  echo
+  [ $RETVAL -eq 0 ] && touch /var/lock/subsys/gosync || RETVAL=1
+  return $RETVAL
+}
+stop() {
+        echo
+  KIND="GoSYNC"
+  echo -n $"Shutting down $KIND services: "
+  killproc gosync
+  RETVAL=$?
+  [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/gosync; rm -f $GSPID
+  echo ""
+  return $RETVAL
+}
+restart() {
+  stop
+  start
+}
+rhstatus() {
+  status gosync
+  return $?
+}
+# Allow status as non-root.
+if [ "$1" = status ]; then
+       rhstatus
+       exit $?
+fi
+case "$1" in
+  start)
+   start
+  ;;
+  stop)
+    stop
+  ;;
+  restart)
+    restart
+  ;;
+  reload)
+    reload
+  ;;
+  status)
+    rhstatus
+  ;;
+  condrestart)
+    [ -f /var/lock/subsys/gosync ] && restart || :
+  ;;
+  *)
+  echo $"Usage: $0 {start|stop|restart|reload|status|condrestart}"
+  exit 2
+esac
+exit $?

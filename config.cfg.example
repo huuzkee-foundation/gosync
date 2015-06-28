@@ -1,0 +1,54 @@
+[ServerConfig]
+# Port for the file server to listen on
+listen_port = "44444"
+# Rescan time in seconds
+rescan = 30
+# The filesystem storage to be used
+storagetype="s3"
+# The location for the log file (can be stdout or a path to file)
+#log_location="stdout"
+log_location="/var/log/gosync/gosync.log"
+
+# Log levels are (debug, info, warning,error, critical)
+# The lower the log level the more information is printed (debug provides the most output)
+log_level="debug"
+
+[StorageS3]
+key=""
+secret=""
+region=""
+
+[StorageGDrive]
+key=""
+secret=""
+region=""
+
+[Database]
+type = "mysql"
+# DSN Takes the following form:
+dsn = "test:testing@tcp(10.0.1.105:3306)/gosync?autocommit=true"
+
+# The UID and GID for each directory enforces the files in that directory to be owned by that particular user
+# That allows for mismatched UID / GIDs between servers
+
+[listeners]
+    # The [listeners.<IDENTIFIER>] is important as it is the alias for the directory you are backing up
+    # this identifier should match on your other hosts and should not include special chars including spaces.
+    # The identifier is also used as the table name in the database during initial creation
+
+	[listeners.MonitorMe1]
+	#Basepath is used if you are using only 1 bucket to seperate all downloads into different base subdirectories
+    basepath="/gosync/monitorMe"
+
+    # To exclude files from being tracked edit the .goignore file in the base directory
+
+    #UID / GID below is what the files should be owned as when synced
+	uid = 504
+  	gid = 504
+  	directory = "/data/storage"
+	storagetype="s3"
+	bucket="fssync"
+
+    # For additional Listeners:
+    # Just duplicate the Listener block above for additional sync directories and update as required
+

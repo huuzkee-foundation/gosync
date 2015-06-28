@@ -1,0 +1,33 @@
+language: go
+go:
+- 1.3
+- release
+- tip
+
+env:
+ global:
+   - "ARTIFACTS_AWS_REGION=us-east-1"
+   - "ARTIFACTS_S3_BUCKET=nitecon-builds"
+   - secure: "bQv62yx7mxpOlOtJNUpuqGdW00gITAMvFplRxIq3k3vyor7k/om+PNSd3DE8Ulqm0Fv9ZQ795xTUEvyp9ll7HBsA/5ZhoYdIyqTYlOXUwvcZ7gp7ddlsuKpXbHP0A3pxbPLkZLTHSfjLmLFOI/OhVQtI/XknPSOoeKBta7LvXDI="
+   - secure: "BjvOaPXMoYyekk5d5kb7ZJ3I7n1FBH3hYfvzQ0SMN6fiNZNr6oHwudBw5lVNbEwn+u577KIXFp24pE2HESkzkxPOGI7D1ooZsjoV7UaAaR4K8cY8Y9CV6aovP35apgfQ1R89VcHV528CKPBmVSrQBUvC3noK0ER785Ryq+VuUQo="
+
+before_script:
+- "gem install travis-artifacts"
+after_script:
+  - "travis-artifacts upload --path logs --path a/long/nested/path:short_alias"
+after_failure: # this will of course run only on failure
+  - "travis-artifacts upload --path debug/debug.log"
+after_success: # and this only on success
+  - "travis-artifacts upload --path build/gosync.tar.gz"
+after_test:
+  - "travis-artifacts upload --target-path artifacts/$TRAVIS_BUILD_ID/$TRAVIS_JOB_ID"
+
+script:
+- go test
+
+
+
+
+
+
+
